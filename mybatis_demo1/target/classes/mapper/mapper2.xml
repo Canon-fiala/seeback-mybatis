@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace=绑定一个指定的Dao/Mapper接口-->
+<mapper namespace="com.mybatis.mapper.AccountDao">
+    <select id="getAccountAndUser" resultMap="AccountAndUser">
+        select * from bank
+    </select>
+    <resultMap id="AccountAndUser" type="com.mybatis.model.Account">
+        <result column="id" property="id"/>
+        <result column="bankname" property="bankname"/>
+        <result column="account_name" property="accountname"/>
+        <result column="user_id" property="uid"/>
+        <association property="user" column="user_id" javaType="com.mybatis.model.Userinfo" select="accountUser"/>
+    </resultMap>
+    <select id="accountUser" resultMap="resultUser">
+        select * from userinfo where id =#{uid}
+    </select>
+    <resultMap id="resultUser" type="com.mybatis.model.Userinfo">
+        <result column="hobby" property="interests"/>
+    </resultMap>
+ <!--多对一，联表查询-->
+    <select id="getAccountAndUser2" resultMap="AccountAndUser2">
+        select
+        ba.id,ba.bankname,ba.account_name,ba.user_id,us.username,
+               us.password,us.age,us.phone,us.email,us.hobby
+        from
+        bank ba,userinfo us
+        where
+        ba.user_id = us.id
+    </select>
+    <resultMap id="AccountAndUser2" type="com.mybatis.model.Account">
+        <result column="id" property="id"/>
+        <result column="bankname" property="bankname"/>
+        <result column="account_name" property="accountname"/>
+        <result column="user_id" property="uid"/>
+        <association property="user" column="user_id" javaType="com.mybatis.model.Userinfo">
+            <result column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="password" property="password"/>
+            <result column="age" property="age"/>
+            <result column="phone" property="phone"/>
+            <result column="email" property="email"/>
+            <result column="hobby" property="interests"/>
+        </association>
+    </resultMap>
+
+
+    <select id="getAccountByIf" parameterType="map" resultMap="Account">
+        select * from bank
+--         where 1=1
+        <where>
+        <if test="id != null">
+            and id=#{id}
+        </if>
+        <if test="bankname != null">
+            or bankname=#{bankname}
+        </if>
+        </where>
+    </select>
+    <resultMap id="Account" type="com.mybatis.model.Account">
+        <result column="id" property="id"/>
+        <result column="bankname" property="bankname"/>
+        <result column="account_name" property="accountname"/>
+        <result column="user_id" property="uid"/>
+    </resultMap>
+
+    <select id="getAccountByChoose" resultMap="Account">
+        select * from bank
+      <where>
+          <choose>
+              <when test="id != null">
+                  and id =#{id}
+              </when>
+              <when test="bankname != null">
+                  and bankname = #{bankname}
+              </when>
+              <when test="account_name != null">
+                  and account_name like "%"#{accountname}"%"
+              </when>
+          </choose>
+      </where>
+    </select>
+
+    <update id="updateAccountBySet" parameterType="map">
+        update bank
+<set>
+    <if test="bankname != null">
+        bankname=#{bankname},
+    </if>
+    <if test="account_name != null">
+        account_name = #{account_name}
+    </if>
+    where user_id = #{uid};
+</set>
+    </update>
+
+    <select id="getAccountByForeach" parameterType="map" resultMap="Account">
+        select * from bank
+<where>
+    <foreach collection="uids" item="uid" open="(" close=")" separator="or">
+        user_id=#{uid}
+    </foreach>
+</where>
+    </select>
+
+    <select id="getAccountByInclude" parameterType="map" resultMap="Account">
+        select * from bank
+<where>
+<include refid="bankAndUid"/>
+</where>
+    </select>
+    <sql id="bankAndUid">
+        <if test="bankname != null">
+            and bankname = #{bankname}
+        </if>
+        <if test="uid != null">
+            and user_id = #{uid}
+        </if>
+    </sql>
+</mapper>

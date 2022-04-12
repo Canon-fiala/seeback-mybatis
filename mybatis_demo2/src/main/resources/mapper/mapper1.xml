@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace=绑定一个指定的Dao/Mapper接口-->
+<mapper namespace="com.mybatis.mapper.UserinfoDao">
+    <select id="getUserInfo" resultMap="userMap">
+--         select id,username,password,age,phone,email,hobby as interests from userinfo
+           select * from userinfo;
+    </select>
+    <select id="getUserInfoById" resultType="com.mybatis.model.Userinfo">
+        select * from userinfo where id=#{id} and username=#{username}
+    </select>
+    <select id="getUserInfoById2" resultType="com.mybatis.model.Userinfo" parameterType="map">
+        select * from userinfo where id=#{id} and username=#{username}
+    </select>
+    <insert id="insertUser" parameterType="com.mybatis.model.Userinfo">
+        insert into userinfo(username,password,age,phone,email) values(#{username},#{password},#{age},#{phone},#{email})
+    </insert>
+    <update id="updateUser" parameterType="com.mybatis.model.Userinfo">
+        update userinfo set username=#{username},phone=#{phone} where id = #{id}
+    </update>
+    <delete id="deleteUser" parameterType="int">
+        delete from userinfo where id= #{id}
+    </delete>
+    <select id="getUserByLike" resultType="com.mybatis.model.Userinfo">
+        select * from userinfo where username like #{username}
+        <!--select * from userinfo where username like "%"{#username}"%"-->
+    </select>
+    <select id="getUserLimitPage" resultMap="userMap" parameterType="map">
+        select * from user limit #{startIndex},#{pageSize}
+    </select>
+
+    <resultMap id="userMap" type="com.mybatis.model.Userinfo">
+        <result column="hobby" property="interests"/>
+    </resultMap>
+</mapper>

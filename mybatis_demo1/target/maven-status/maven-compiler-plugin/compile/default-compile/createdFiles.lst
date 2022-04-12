@@ -1,0 +1,5 @@
+com\mybatis\model\Account.class
+com\mybatis\config\MybatisUtils.class
+com\mybatis\model\Userinfo.class
+com\mybatis\mapper\UserInfoDao.class
+com\mybatis\mapper\AccountDao.class

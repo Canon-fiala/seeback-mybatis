@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace=绑定一个指定的Dao/Mapper接口-->
+<mapper namespace="com.mybatis.mapper.UserInfoDao">
+    <select id="getUserInfo" resultMap="userMap">
+--         select id,username,password,age,phone,email,hobby as interests from userinfo
+           select * from userinfo;
+    </select>
+    <select id="getUserInfoById" resultType="com.mybatis.model.Userinfo">
+        select * from userinfo where id=#{id} and username=#{username}
+    </select>
+    <select id="getUserInfoById2" resultType="com.mybatis.model.Userinfo" parameterType="map">
+        select * from userinfo where id=#{id} and username=#{username}
+    </select>
+    <insert id="insertUser" parameterType="com.mybatis.model.Userinfo">
+        insert into userinfo(username,password,age,phone,email) values(#{username},#{password},#{age},#{phone},#{email})
+    </insert>
+    <update id="updateUser" parameterType="com.mybatis.model.Userinfo">
+        update userinfo set username=#{username},phone=#{phone} where id = #{id}
+    </update>
+    <delete id="deleteUser" parameterType="int">
+        delete from userinfo where id= #{id}
+    </delete>
+    <select id="getUserByLike" resultType="com.mybatis.model.Userinfo">
+        select * from userinfo where username like #{username}
+        <!--select * from userinfo where username like "%"{#username}"%"-->
+    </select>
+    <select id="getUserLimitPage" resultMap="userMap" parameterType="map">
+        select * from userinfo limit #{startIndex},#{pageSize}
+    </select>
+
+    <resultMap id="userMap" type="com.mybatis.model.Userinfo">
+        <result column="hobby" property="interests"/>
+    </resultMap>
+
+
+    <!--一对多的多表查询的子查询-->
+    <select id="getUserAndAccount" resultMap="userMapAndBank">
+        select * from userinfo where id = #{id}
+    </select>
+    <resultMap id="userMapAndBank" type="com.mybatis.model.Userinfo">
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="age" property="age"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="hobby" property="interests"/>
+        <collection property="account" column="id" javaType="ArrayList"
+                    ofType="com.mybatis.model.Account" select="getAccount"/>
+    </resultMap>
+    <select id="getAccount" resultMap="resultAccount">
+        select * from bank where user_id=#{id}
+    </select>
+    <resultMap id="resultAccount" type="com.mybatis.model.Account">
+        <result column="account_bank" property="accountbank"/>
+        <result column="id" property="id"/>
+        <result column="bankname" property="bankname"/>
+    </resultMap>
+
+    <!--一对多的多表查询的联表查询-->
+    <select id="getUserAndAccount2" resultMap="userMapAndBank2">
+        select
+            us.id,us.username,us.password,us.age,us.phone,us.email,us.hobby,
+               ba.id,ba.bankname,ba.account_name,ba.user_id
+        from
+             userinfo us,bank ba
+        where
+             us.id=#{id} and us.id=ba.user_id
+    </select>
+    <resultMap id="userMapAndBank2" type="com.mybatis.model.Userinfo">
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="age" property="age"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="hobby" property="interests"/>
+        <collection property="account" column="id" javaType="ArrayList" ofType="com.mybatis.model.Account">
+            <result column="id" property="id"/>
+            <result column="bankname" property="bankname"/>
+            <result column="account_name" property="accountname"/>
+            <result column="user_id" property="uid"/>
+        </collection>
+    </resultMap>
+</mapper>
